@@ -130,6 +130,15 @@ export default function App() {
   const [settingsSound, setSettingsSound] = useState(true);
   const [settingsOnline, setSettingsOnline] = useState(true);
   const [settingsRead, setSettingsRead] = useState(true);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setProfilePhoto(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
 
   const sendMessage = () => {
     if (!inputText.trim() || !activeChat) return;
@@ -195,9 +204,13 @@ export default function App() {
           </nav>
 
           <div className="viktor-user-mini">
-            <div className="viktor-avatar sm bg-gradient-to-br from-violet-500 to-cyan-500">
-              ЮВ
-            </div>
+            {profilePhoto ? (
+              <img src={profilePhoto} className="viktor-avatar sm" style={{ objectFit: "cover" }} alt="Аватар" />
+            ) : (
+              <div className="viktor-avatar sm bg-gradient-to-br from-violet-500 to-cyan-500">
+                ЮВ
+              </div>
+            )}
             <span className="viktor-nav-label">Юрий В.</span>
           </div>
         </aside>
@@ -456,9 +469,17 @@ export default function App() {
               </div>
               <div className="viktor-profile-hero">
                 <div className="viktor-profile-avatar-wrap">
-                  <div className="viktor-profile-avatar bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-500">
-                    ЮВ
-                  </div>
+                  {profilePhoto ? (
+                    <img src={profilePhoto} className="viktor-profile-avatar" style={{ objectFit: "cover" }} alt="Фото профиля" />
+                  ) : (
+                    <div className="viktor-profile-avatar bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-500">
+                      ЮВ
+                    </div>
+                  )}
+                  <label className="viktor-photo-upload-btn" title="Изменить фото">
+                    <Icon name="Camera" size={16} />
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} style={{ display: "none" }} />
+                  </label>
                 </div>
                 <h3 className="viktor-profile-name">Юрий Викторов</h3>
                 <p className="viktor-profile-handle">@yuriviktorov</p>
