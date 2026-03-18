@@ -131,6 +131,26 @@ export default function App() {
   const [settingsOnline, setSettingsOnline] = useState(true);
   const [settingsRead, setSettingsRead] = useState(true);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [isPremium, setIsPremium] = useState(true); // создатель сразу премиум
+  const [nameColor, setNameColor] = useState("#a78bfa");
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  const PREMIUM_COLORS = [
+    { value: "#a78bfa", label: "Фиолетовый" },
+    { value: "#f472b6", label: "Розовый" },
+    { value: "#34d399", label: "Зелёный" },
+    { value: "#60a5fa", label: "Синий" },
+    { value: "#fb923c", label: "Оранжевый" },
+    { value: "#f87171", label: "Красный" },
+    { value: "#facc15", label: "Золотой" },
+    { value: "#22d3ee", label: "Циановый" },
+  ];
+
+  const handleBuyPremium = () => {
+    setIsPremium(true);
+    setShowPremiumModal(false);
+  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -481,13 +501,56 @@ export default function App() {
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} style={{ display: "none" }} />
                   </label>
                 </div>
-                <h3 className="viktor-profile-name">Юрий Викторов</h3>
-                <p className="viktor-profile-handle">@yuriviktorov</p>
-                <div className="viktor-profile-status-badge">
-                  <span className="viktor-online-dot" />
-                  В сети
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <h3 className="viktor-profile-name" style={isPremium ? { color: nameColor, textShadow: `0 0 20px ${nameColor}60` } : {}}>
+                    Юрий Викторов
+                  </h3>
+                  {isPremium && (
+                    <span className="viktor-creator-badge">Создатель</span>
+                  )}
                 </div>
+                <p className="viktor-profile-handle">@yuriviktorov</p>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+                  <div className="viktor-profile-status-badge">
+                    <span className="viktor-online-dot" />
+                    В сети
+                  </div>
+                  {isPremium && (
+                    <div className="viktor-premium-badge">⭐ Viktor Premium</div>
+                  )}
+                </div>
+                {isPremium && (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginTop: 4 }}>
+                    <button className="viktor-color-toggle-btn" onClick={() => setShowColorPicker(!showColorPicker)}>
+                      <span style={{ width: 14, height: 14, borderRadius: "50%", background: nameColor, display: "inline-block" }} />
+                      Цвет имени
+                    </button>
+                    {showColorPicker && (
+                      <div className="viktor-color-picker">
+                        {PREMIUM_COLORS.map((c) => (
+                          <button
+                            key={c.value}
+                            className={`viktor-color-swatch ${nameColor === c.value ? "active" : ""}`}
+                            style={{ background: c.value, boxShadow: nameColor === c.value ? `0 0 0 3px #fff, 0 0 0 5px ${c.value}` : "none" }}
+                            title={c.label}
+                            onClick={() => { setNameColor(c.value); setShowColorPicker(false); }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
+              {!isPremium && (
+                <button className="viktor-premium-banner" onClick={() => setShowPremiumModal(true)}>
+                  <div className="viktor-premium-banner-icon">⭐</div>
+                  <div>
+                    <div className="viktor-premium-banner-title">Viktor Premium</div>
+                    <div className="viktor-premium-banner-sub">Цветные имена и эксклюзивные функции</div>
+                  </div>
+                  <div className="viktor-premium-banner-price">50 ₽/мес</div>
+                </button>
+              )}
               <div className="viktor-profile-stats">
                 {[
                   { label: "Чатов", value: "24" },
@@ -603,6 +666,29 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Модалка Премиум */}
+      {showPremiumModal && (
+        <div className="viktor-modal-overlay animate-fade-in" onClick={() => setShowPremiumModal(false)}>
+          <div className="viktor-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="viktor-modal-star">⭐</div>
+            <h3 className="viktor-modal-title">Viktor Premium</h3>
+            <p className="viktor-modal-sub">Разблокируй эксклюзивные возможности</p>
+            <ul className="viktor-modal-features">
+              <li><Icon name="Palette" size={16} /> Цветные имена в профиле</li>
+              <li><Icon name="Zap" size={16} /> Приоритетная поддержка</li>
+              <li><Icon name="Star" size={16} /> Значок Premium</li>
+              <li><Icon name="Shield" size={16} /> Расширенная приватность</li>
+            </ul>
+            <button className="viktor-buy-btn" onClick={handleBuyPremium}>
+              Оформить за 50 ₽/месяц
+            </button>
+            <button className="viktor-modal-close" onClick={() => setShowPremiumModal(false)}>
+              Не сейчас
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Видеозвонок */}
       {videoCallActive && (
